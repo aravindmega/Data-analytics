@@ -1,0 +1,56 @@
+# Load necessary libraries
+library(tidyverse)
+library(ROCR)
+library(caTools)
+
+# View and split the data
+data(mtcars)  # Ensure 'mtcars' dataset is loaded
+mtcars$vs <- as.factor(mtcars$vs)  # Convert vs to factor for classification
+split <- sample.split(mtcars$vs, SplitRatio = 0.8)  # Split dataset based on vs
+train <- subset(mtcars, split == TRUE)
+test <- subset(mtcars, split == FALSE)
+
+# Logistic regression model
+logistic_model <- glm(vs ~ wt + disp, data = train, family = binomial)
+summary(logistic_model)
+
+# Predict probabilities on the test dataset
+predict_reg <- predict(logistic_model, test, type = "response")
+
+# Convert probabilities to binary predictions using threshold 0.5
+predict_class <- ifelse(predict_reg > 0.5, 1, 0)
+
+# Confusion matrix
+conf_mat <- table(Actual = test$vs, Predicted = predict_class)
+print(conf_mat)
+
+# Calculate accuracy
+missing_classerr <- mean(predict_class != as.numeric(as.character(test$vs)))
+accuracy <- 1 - missing_classerr
+print(paste("Accuracy =", round(accuracy, 4)))
+
+# Plot logistic regression curve
+ggplot(mtcars, aes(x = wt + disp, y = as.numeric(as.character(vs)))) +
+  geom_point(alpha = 0.5) +
+  stat_smooth(method = "glm", method.args = list(family = binomial), se = FALSE, color = "red") +
+  labs(title = "Logistic Regression Curve", x = "wt + disp", y = "vs") +
+  theme_minimal()
+
+# Generate ROC curve
+ROCPred <- prediction(predict(logistic_model, test, type = "response"), test$vs)
+ROCPer <- performance(ROCPred, measure = "tpr", x.measure = "fpr")
+
+# Plot ROC curve
+plot(ROCPer, colorize = TRUE, print.cutoffs.at = seq(0.1, by = 0.1), main = "ROC Curve")
+abline(a = 0, b = 1, col = "gray", lty = 2)
+
+# Calculate and display AUC
+auc <- performance(ROCPred, measure = "auc")@y.values[[1]]
+auc <- round(auc, 4)
+legend("bottomright", legend = paste("AUC =", auc), title = "AUC", cex = 1)
+
+
+
+
+
+ 
