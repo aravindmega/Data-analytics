@@ -1,0 +1,23 @@
+# Data-analytics
+  install.packages("tidyverse")
+library(tidyverse)
+
+x <- sample(1:21, 20, replace = TRUE)
+y <- sample(1:11, 20, replace = TRUE)
+
+for (i in 1:20) {
+  a <- x[i]
+  b <- y[i]
+  mtcars[a, b] = NA
+}
+
+which(is.na(mtcars))
+sum(is.na(mtcars))
+na.exclude(mtcars)
+View(mtcars)
+dispna <- apply(mtcars["disp"], 2, mean, na.rm = TRUE)
+View(dispna)
+newCars <- mtcars %>%
+  mutate(disp = ifelse(is.na(disp), dispna, disp))
+View(newCars)
+
