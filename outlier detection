@@ -1,0 +1,17 @@
+install.packages("tidyr")
+install.packages("lubridate")
+library(lubridate)
+library(tidyr)
+day <- read.csv("D:/BTech/DA/day.csv")
+View(day)
+sum(is.na(day))
+boxplot(day[,c("temp", "hum", "windspeed")])
+for(i in c("hum", "windspeed")){
+  data <- unlist(day[i])
+  newData <- data[data %in% boxplot.stats(data) $ out]
+  data[data %in% newData] = NA
+  day[i] = data
+}
+sum(is.na(data))
+day = drop_na(day)
+boxplot(day[,c("temp", "hum", "windspeed")])
